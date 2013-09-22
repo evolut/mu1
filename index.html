@@ -59,22 +59,21 @@
       //
       largeImage.src = imageURI;
     }
+    
+    
+function captureSuccess(mediaFiles) {    
+    uploadFile(mediaFiles[0]);
+}
 
     // A button will call this function
     //
-    function capturePhoto() {
-      // Take picture using device camera and retrieve image as base64-encoded string
-      navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 50,
-        destinationType: destinationType.DATA_URL });
-    }
+function captureImage() {
+    // Launch device camera application,
+    // allowing user to capture only one image by {limit: 1}
+    navigator.device.capture.captureImage(captureSuccess, captureError, { limit: 1 });
+}
 
-    // A button will call this function
-    //
-    function capturePhotoEdit() {
-      // Take picture using device camera, allow edit, and retrieve image as base64-encoded string
-      navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 20, allowEdit: true,
-        destinationType: destinationType.DATA_URL });
-    }
+
 
     // A button will call this function
     //
@@ -90,12 +89,42 @@
     function onFail(message) {
       alert('Failed because: ' + message);
     }
+    
+// Upload files to server
+function uploadFile(mediaFile) {
+    path = mediaFile.fullPath;
+    name = mediaFile.name;
+    
+    var options = new FileUploadOptions();
+    options.fileKey="file";
+    options.fileName=mediaFile.name;
+    options.mimeType="image/jpeg";
+
+    var params = new Object();
+    params.fullpath = path;
+    params.name = name;
+
+    options.params = params;
+    options.chunkedMode = false;
+    
+    var ft = new FileTransfer();
+    ft.upload( path, "http://www.topgeo.de/muytest/upload.php",
+        function(result) {
+			//upload successful            
+        },
+        function(error) {
+            //upload unsuccessful, error occured while upload. 
+        },
+        options
+        );
+}
+    
 
     </script>
   </head>
   <body>
     <button onclick="capturePhoto();">Capture Photo</button> <br>
-    <button onclick="capturePhotoEdit();">Capture Editable Photo</button> <br>
+  
     <button onclick="getPhoto(pictureSource.PHOTOLIBRARY);">From Photo Library</button><br>
     <button onclick="getPhoto(pictureSource.SAVEDPHOTOALBUM);">From Photo Album</button><br>
     <img style="display:none;width:60px;height:60px;" id="smallImage" src="" />
