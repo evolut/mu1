@@ -70,7 +70,9 @@ function captureSuccess(mediaFiles) {
 function captureImage() {
     // Launch device camera application,
     // allowing user to capture only one image by {limit: 1}
-    navigator.device.capture.captureImage(captureSuccess, captureError, { limit: 1 });
+   // navigator.device.capture.captureImage(captureSuccess, captureError, { limit: 1 });
+         navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 50,
+        destinationType: destinationType.DATA_URL });
 }
 
 
