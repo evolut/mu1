@@ -1,141 +1,61 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-  <head>
-    <title>Capture Photo</title>
+<head>
+    <title>File Transfer Example</title>
 
-    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" charset="utf-8" src="cordova-2.4.0.js"></script>
     <script type="text/javascript" charset="utf-8">
 
-    var pictureSource;   // picture source
-    var destinationType; // sets the format of returned value
+        // Wait for Cordova to load
+        //
+        document.addEventListener("deviceready", onDeviceReady, false);
 
-    // Wait for device API libraries to load
-    //
-    document.addEventListener("deviceready",onDeviceReady,false);
+        // Cordova is ready
+        //
+        function onDeviceReady() {
 
-    // device APIs are available
-    //
-    function onDeviceReady() {
-        pictureSource=navigator.camera.PictureSourceType;
-        destinationType=navigator.camera.DestinationType;
-    }
+            // Retrieve image file location from specified source
+            navigator.camera.getPicture(uploadPhoto,
+                                        function(message) { alert('get picture failed'); },
+                                        { quality: 50, 
+                                        destinationType: navigator.camera.DestinationType.FILE_URI,
+                                        sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY }
+                                        );
 
+        }
 
-function captureSuccess(mediaFiles) {    
-    uploadFile(mediaFiles[0]);
-}
+        function uploadPhoto(imageURI) {
+            var options = new FileUploadOptions();
+            options.fileKey="file";
+            options.fileName=imageURI.substr(imageURI.lastIndexOf('/')+1);
+            options.mimeType="image/jpeg";
 
-    // Called when a photo is successfully retrieved
-    //
-    function onPhotoDataSuccess(imageData) {
-      // Uncomment to view the base64-encoded image data
-      // console.log(imageData);
+            var params = {};
+            params.value1 = "test";
+            params.value2 = "param";
 
-      // Get image handle
-      //
-      var smallImage = document.getElementById('smallImage');
+            options.params = params;
 
-      // Unhide image elements
-      //
-      smallImage.style.display = 'block';
+            var ft = new FileTransfer();
+            ft.upload(imageURI, encodeURI("http://www.topgeo.de/muytest/upload.php"), win, fail, options);
+        }
 
-      // Show the captured photo
-      // The inline CSS rules are used to resize the image
-      //
-      smallImage.src = "data:image/jpeg;base64," + imageData;
-      uploadFile
-    }
+        function win(r) {
+            console.log("Code = " + r.responseCode);
+            console.log("Response = " + r.response);
+            console.log("Sent = " + r.bytesSent);
+        }
 
-    // Called when a photo is successfully retrieved
-    //
-    function onPhotoURISuccess(imageURI) {
-      // Uncomment to view the image file URI
-      // console.log(imageURI);
+        function fail(error) {
+            alert("An error has occurred: Code = " + error.code);
+            console.log("upload error source " + error.source);
+            console.log("upload error target " + error.target);
+        }
 
-      // Get image handle
-      //
-      var largeImage = document.getElementById('largeImage');
-
-      // Unhide image elements
-      //
-      largeImage.style.display = 'block';
-
-      // Show the captured photo
-      // The inline CSS rules are used to resize the image
-      //
-      largeImage.src = imageURI;
-    }
-    
-    
-function captureSuccess(mediaFiles) {    
-    uploadFile(mediaFiles[0]);
-}
-
-    // A button will call this function
-    //
-function capturePhoto() {
-    // Launch device camera application,
-    // allowing user to capture only one image by {limit: 1}
-   // navigator.device.capture.captureImage(captureSuccess, captureError, { limit: 1 });
-        // navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 50,destinationType: destinationType.DATA_URL });
- 
-          navigator.camera.getPicture(captureSuccess, onFail, { quality: 50 });       
-}
-
-
-
-    // A button will call this function
-    //
-    function getPhoto(source) {
-      // Retrieve image file location from specified source
-      navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50,
-        destinationType: destinationType.FILE_URI,
-        sourceType: source });
-    }
-
-    // Called if something bad happens.
-    //
-    function onFail(message) {
-      alert('Failed because: ' + message);
-    }
-    
-
-    // Upload files to server
-function uploadFile(mediaFile) {
-    path = mediaFile.fullPath;
-    name = mediaFile.name;
-    
-    var options = new FileUploadOptions();
-    options.fileKey="file";
-    options.fileName=mediaFile.name;
-    options.mimeType="image/jpeg";
-
-    var params = new Object();
-    params.fullpath = path;
-    params.name = name;
-
-    options.params = params;
-    options.chunkedMode = false;
-    
-    var ft = new FileTransfer();
-    ft.upload( path, "http://www.topgeo.de/muytest/upload.php",
-        function(result) {
-			//upload successful            
-        },
-        function(error) {
-            //upload unsuccessful, error occured while upload. 
-        },
-        options
-        );
-}
-
-    </script>
-  </head>
-  <body>
-    <button onclick="capturePhoto();">Capture Photo</button> <br>
-  
-
-    <img style="display:none;width:60px;height:60px;" id="smallImage" src="" />
-    <img style="display:none;" id="largeImage" src="" />
-  </body>
+        </script>
+</head>
+<body>
+    <h1>Example</h1>
+    <p>Upload File</p>
+</body>
 </html>
