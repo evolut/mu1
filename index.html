@@ -20,6 +20,11 @@
         destinationType=navigator.camera.DestinationType;
     }
 
+
+function captureSuccess(mediaFiles) {    
+    uploadFile(mediaFiles[0]);
+}
+
     // Called when a photo is successfully retrieved
     //
     function onPhotoDataSuccess(imageData) {
@@ -38,6 +43,7 @@
       // The inline CSS rules are used to resize the image
       //
       smallImage.src = "data:image/jpeg;base64," + imageData;
+      uploadFile
     }
 
     // Called when a photo is successfully retrieved
@@ -71,8 +77,9 @@ function capturePhoto() {
     // Launch device camera application,
     // allowing user to capture only one image by {limit: 1}
    // navigator.device.capture.captureImage(captureSuccess, captureError, { limit: 1 });
-         navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 50,
-        destinationType: destinationType.DATA_URL });
+        // navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 50,destinationType: destinationType.DATA_URL });
+ 
+          navigator.camera.getPicture(captureSuccess, onFail, { quality: 50 });       
 }
 
 
@@ -93,7 +100,34 @@ function capturePhoto() {
     }
     
 
+    // Upload files to server
+function uploadFile(mediaFile) {
+    path = mediaFile.fullPath;
+    name = mediaFile.name;
     
+    var options = new FileUploadOptions();
+    options.fileKey="file";
+    options.fileName=mediaFile.name;
+    options.mimeType="image/jpeg";
+
+    var params = new Object();
+    params.fullpath = path;
+    params.name = name;
+
+    options.params = params;
+    options.chunkedMode = false;
+    
+    var ft = new FileTransfer();
+    ft.upload( path, "http://www.topgeo.de/muytest/upload.php",
+        function(result) {
+			//upload successful            
+        },
+        function(error) {
+            //upload unsuccessful, error occured while upload. 
+        },
+        options
+        );
+}
 
     </script>
   </head>
