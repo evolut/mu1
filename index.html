@@ -1,61 +1,102 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
-<head>
-    <title>File Transfer Example</title>
+  <head>
+	<title>Capture and Upload Photo</title>
 
-    <script type="text/javascript" charset="utf-8" src="cordova-2.4.0.js"></script>
-    <script type="text/javascript" charset="utf-8">
+	<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+	<script type="text/javascript" charset="utf-8">
 
-        // Wait for Cordova to load
-        //
-        document.addEventListener("deviceready", onDeviceReady, false);
+	var pictureSource;   // picture source
+	var destinationType; // sets the format of returned value
+    var fileURI; // for the upload
 
-        // Cordova is ready
-        //
-        function onDeviceReady() {
+	// Wait for device API libraries to load
+	//
+	document.addEventListener("deviceready",onDeviceReady,false);
 
-            // Retrieve image file location from specified source
-  
-            navigator.camera.getPicture(uploadPhoto,
-                                        function(message) { alert('get picture failed'); },
-                                        { quality: 50, 
-                                        destinationType: navigator.camera.DestinationType.FILE_URI}
-                                        );
+	// device APIs are available
+	//
+	function onDeviceReady() {
+    	pictureSource=navigator.camera.PictureSourceType;
+    	destinationType=navigator.camera.DestinationType;
+	}
 
-        }
+	// Called when a photo is successfully retrieved
+	//
+	function onPhotoURISuccess(imageURI) {
+  	// Uncomment to view the image file URI
+  	// console.log(imageURI);
 
-        function uploadPhoto(imageURI) {
-            var options = new FileUploadOptions();
-            options.fileKey="file";
-            options.fileName=imageURI.substr(imageURI.lastIndexOf('/')+1);
-            options.mimeType="image/jpeg";
+  	// Get image handle
+  	//
+  	var smallImage = document.getElementById('smallImage');
 
-            var params = {};
-            params.value1 = "test";
-            params.value2 = "param";
+  	// Unhide image elements
+  	//
+  	smallImage.style.display = 'block';
 
-            options.params = params;
+  	// Show the captured photo
+  	// The inline CSS rules are used to resize the image
+  	//
+  	smallImage.src = imageURI;
+     fileURI = imageURI; // for the upload
+     }
 
-            var ft = new FileTransfer();
-            ft.upload(imageURI, encodeURI("http://www.topgeo.de/muytest/upload.php"), win, fail, options);
-        }
 
-        function win(r) {
-            console.log("Code = " + r.responseCode);
-            console.log("Response = " + r.response);
-            console.log("Sent = " + r.bytesSent);
-        }
+	// A button will call this function
+	//
+	function capturePhoto() {
+  	// Take picture using device camera
+  	navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50,
+    	destinationType: destinationType.FILE_URI });
+	}
 
-        function fail(error) {
-            alert("An error has occurred: Code = " + error.code);
-            console.log("upload error source " + error.source);
-            console.log("upload error target " + error.target);
-        }
+	// Called if something bad happens.
+	//
+	function onFail(message) {
+  	alert('Failed because: ' + message);
+	}
 
-        </script>
-</head>
-<body>
-    <h1>Example</h1>
-    <p>Upload File</p>
-</body>
+	function uploadPhoto() {
+   		 var imageURI = fileURI;
+        	var options = new FileUploadOptions();
+        	options.fileKey="media";
+        	options.fileName=imageURI.substr(imageURI.lastIndexOf('/')+1);
+        	options.mimeType="image/jpeg";
+
+        	var params = {};
+        	params.value1 = "test";
+        	params.value2 = "param";
+
+        	options.params = params;
+
+        	var ft = new FileTransfer();
+        	ft.upload(imageURI, encodeURI("http://www.topgeo.de/muytest/upload.php"), win, fail, options);
+    	}
+
+	function win(r) {
+        	console.log("Code = " + r.responseCode);
+        	console.log("Response = " + r.response);
+        	console.log("Sent = " + r.bytesSent);
+	alert("Sent = " + r.bytesSent);
+    	}
+
+    	function fail(error) {
+        	alert("An error has occurred: Code = " + error.code);
+        	console.log("upload error source " + error.source);
+        	console.log("upload error target " + error.target);
+    	}
+
+    
+    
+    
+	</script>
+  </head>
+  <body>
+	<button onclick="capturePhoto();">Capture Photo</button> <br>
+	<button onclick="uploadPhoto();">Capture Photo</button> <br>
+
+	<img style="display:none;width:60px;height:60px;" id="smallImage" src="" />
+
+  </body>
 </html>
